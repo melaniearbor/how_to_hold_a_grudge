@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Django Project{% endblock %}</title>
+    
+    <!-- Static files (CSS, JavaScript) -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    {% block extra_head %}
+    <!-- Extra head content can be added here -->
+    {% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <ul>
+        </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="content">
+        {% block content %}
+        <!-- Page-specific content will be injected here -->
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer>
+    </footer>
+
+    <!-- JavaScript Files -->
+    <script src="{% static 'js/scripts.js' %}"></script>
+    
+    {% block extra_js %}
+    <!-- Extra JavaScript can be added here -->
+    {% endblock %}
+</body>
+</html>
