@@ -22,6 +22,6 @@ from grudge_cabinet.views import GrudgeListView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("grudges/", GrudgeListView.as_view()),
+    path("grudges/", GrudgeListView.as_view(), name="grudge_cabinet"),
     path("accounts/", include("allauth.urls")),
 ]
