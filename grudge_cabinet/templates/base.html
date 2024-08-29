@@ -15,13 +15,46 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav>
-        <ul>
-        </ul>
+    {% url "grudge_cabinet" as grudge_cabinet_url %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ grudge_cabinet_url }}">How to Hold a Grudge</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link{% if request.path == grudge_cabinet_url %} active{% endif %}"
+                aria-current="page"
+                href="{{ grudge_cabinet_url }}"
+              >Grudge Cabinet</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" aria-current="page" href="#">Gratitude Cabinet</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav d-flex">
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link disabled" aria-current="page" href="#">Logout</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link disabled" aria-current="page" href="#">Register</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" aria-current="page" href="#">Login</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
     </nav>
 
     <!-- Main Content Area -->
-    <div class="container">
+    <div class="container mt-4">
         {% block content %}
         <!-- Page-specific content will be injected here -->
         {% endblock %}
@@ -30,6 +63,9 @@
     <!-- Footer -->
     <footer>
     </footer>
+
+    <!-- JavaScript Files -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     {% block extra_js %}
     <!-- Extra JavaScript can be added here -->
