@@ -1,4 +1,3 @@
-from random import choice, choices
 from django.db import models
 
 
@@ -8,11 +7,21 @@ class BaseMetadata(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        abstract = True
+
 
 class Story(BaseMetadata):
     """The story behind a grudge."""
 
-    origin_story = models.TextField(help_text="The origin story of this grudge. Be specific.")
+    title = models.CharField(max_length=2000)
+    origin = models.TextField(help_text="The origin story of this grudge. Be specific.")
+
+    class Meta:
+        verbose_name_plural = "Stories"
+
+    def __str__(self) -> str:
+        return f"{self.title}"
 
 
 class Grudge(BaseMetadata):
@@ -100,9 +109,40 @@ class Grudge(BaseMetadata):
             "c) for a short time, and you'll probably have given up this grudge by next week",
         )
 
+    class GrudgePotency(models.IntegerChoices):
+        """
+        Is this incident enough on its own to make you hold a grudge?
+        """
+
+        YES = 1, "a) yes"
+        NO = 0, "no, only with other incidents taken into account too"
+
+    class GrudgeeRisk(models.IntegerChoices):
+        """Would something bad or frightening have happened to the
+        grudgee if they hadn't performed the grudge-sparking action?
+        """
+
+        NO = 0, "a) no"
+        YES = -1, "b) yes"
+
+    class EasilyForgiven(models.IntegerChoices):
+        """Could you forgive the grudge with a proper apology?"""
+
+        NO = 0, "a) no"
+        YES = -1, "b) yes"
+
+    class GrudgeeSignificance(models.IntegerChoices):
+        """
+        Does the grudgee matter to you? Do you matter to them?
+        """
+
+        MASSIVELY = 4, "a) yes, massively"
+        QUITE_A_LOT = 2, "b) yes, quite a lot"
+        NOT_ESPECIALLY = 0, "c) not especially—only as a fellow human being"
+
     # Model attributes
 
-    title = models.CharField(max_length=2000)
+    origin_story = models.OneToOneField(Story, on_delete=models.CASCADE, related_name="grudge")
     grudgee_intention = models.IntegerField(
         choices=Intention.choices,
         help_text="How bad was the intention of the grudgee?",
@@ -135,29 +175,26 @@ class Grudge(BaseMetadata):
         choices=GrudgeLength.choices, help_text="Have you held this grudge:"
     )
 
-    @property
-    def additive_attributes(self):
-        """
-        These attribute's values are additive. Their values increase the
-        overall carat value of the Grudge.
-        """
-        return [
-            self.grudgee_intention,
-            self.grudgee_knowledge,
-            self.seriousness_of_situation,
-            self.grudge_effect,
-            self.grudgee_skill,
-            self.harm_level,
-            self.grr_factor,
-            self.grudge_length,
-        ]
+    grudgee_risk = models.IntegerField(
+        choices=GrudgeeRisk.choices,
+        help_text=(
+            "Would something bad or frightening have happened to your "
+            "grudgee if they hadn't performed the grudge-sparking action?"
+        ),
+    )
 
-    @property
-    def subtractive_attributes(self):
-        """
-        These attribute's values are subtractive. Their values reduce
-        the overall carat value of the Grudge"""
-        return 0
+    grudge_easily_forgiven = models.IntegerField(
+        choices=EasilyForgiven.choices,
+        help_text=(
+            "Would this grudge be canceled out/terminated if your "
+            "grudgee apologized fully and wholeheartedly?"
+        ),
+    )
+
+    grudgee_significance = models.IntegerField(
+        choices=GrudgeeSignificance.choices,
+        help_text=("Is your grudgee someone who matters to you, and to whom you matter?"),
+    )
 
     @property
     def carat(self):
@@ -165,4 +202,17 @@ class Grudge(BaseMetadata):
         The additive and subtractive attributes of each grudge determine
         its carat value.
         """
-        return 0
+        return sum(
+            getattr(self, field.name)
+            for field in self._meta.get_fields()
+            if isinstance(field, models.IntegerField)
+        )
+
+    def __str__(self):
+        """
+        The string representation of the Grudge. If there's a story, use that
+        title, otherwise use the Grudge ID.
+        """
+        if self.origin_story:
+            return f"Grudge for {self.origin_story.title}"
+        return f"Grudge {self.id}"
